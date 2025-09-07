@@ -1,5 +1,5 @@
 import hashlib
-
+from loger.loges_to_a_file import logging
 
 class Create_hash:
     def __init__(self):

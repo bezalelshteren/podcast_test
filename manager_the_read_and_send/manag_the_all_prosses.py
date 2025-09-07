@@ -3,7 +3,7 @@ from reader.read_local_files import Read_local_files
 from get_The_metadata.get_metadata import Get_metadata
 from pathlib import Path
 from dotenv import load_dotenv
-import logging
+from loger.loges_to_a_file import logging
 import os
 
 
@@ -21,19 +21,14 @@ class Manager:
 
     def start_all_proces(self):
         try:
-            mass = []
             print("start all proces")
             all_paths = self.reader.read_the_all_paths()
             all_path_and_metadata = self.get_metadata.get_the_metadata(all_paths)
-            # print(all_path_and_metadata)
+
             for massage in all_path_and_metadata:
-                for key,value in massage.items():
-                    mass.append(key)
-                    mass.append(value)
-                    # self.producer.publish_message(self.topic_name,mass)
-                    # logging.info(f"publish {massage}")
-                    print(massage)
-                break
+                self.producer.publish_message(self.topic_name,massage)
+                print(f"publish {massage}")
+                logging.info(f"publish {massage}")
             print("Finish all publish")
             logging.info("connect_to_producer")
         except Exception as e:
@@ -42,3 +37,24 @@ class Manager:
 
 manage = Manager(wav_path,topic_name)
 manage.start_all_proces()
+
+
+# def start_all_proces(self):
+#     try:
+#         mass = []
+#         print("start all proces")
+#         all_paths = self.reader.read_the_all_paths()
+#         all_path_and_metadata = self.get_metadata.get_the_metadata(all_paths)
+#         # print(all_path_and_metadata)
+#         for massage in all_path_and_metadata:
+#             for key, value in massage.items():
+#                 mass.append(key)
+#                 mass.append(value)
+#                 # self.producer.publish_message(self.topic_name,mass)
+#                 # logging.info(f"publish {massage}")
+#                 print(mass)
+#             break
+#         print("Finish all publish")
+#         logging.info("connect_to_producer")
+#     except Exception as e:
+#         logging.error(f"not publish")

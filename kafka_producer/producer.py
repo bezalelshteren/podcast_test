@@ -1,6 +1,6 @@
 from kafka import KafkaProducer
 import json
-
+from loger.loges_to_a_file import logging
 
 class Producer:
 

@@ -2,7 +2,7 @@ from kafka import KafkaConsumer
 from dotenv import load_dotenv
 import os
 import json
-import logging
+from loger.loges_to_a_file import logging
 
 load_dotenv()
 

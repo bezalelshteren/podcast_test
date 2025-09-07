@@ -1,5 +1,5 @@
 import wave
-import logging
+from loger.loges_to_a_file import logging
 # from reader.read_local_files import Read_local_files
 from pathlib import Path
 # from dotenv import load_dotenv
@@ -13,9 +13,7 @@ ROOT_PATH = Path(__file__).resolve().parent
 
 class Get_metadata:
     def __init__(self):
-        # self.reader = Read_local_files(wav_path)
-        # self.list_of_path = self.reader.read_the_all_paths()
-        self.json_metadata = {}
+        self.list_all_path_and_metadata = []
 
     def get_wav_metadata(self,own_path):
         try:
@@ -32,15 +30,16 @@ class Get_metadata:
 
     def get_the_metadata(self,list_of_path):
         try:
-            list_all_path_and_metadata = []
+
             for path in list_of_path:
+                json_metadata = {}
                 path = Path(path)
-                self.json_metadata[str(path)] = self.get_wav_metadata(path)
-                list_all_path_and_metadata.append(self.json_metadata)
-                logging.info(f"the function get metadata {list_all_path_and_metadata}")
+                json_metadata[str(path)] = self.get_wav_metadata(path)
+                self.list_all_path_and_metadata.append(json_metadata)
+                logging.info(f"the function get metadata {self.list_all_path_and_metadata}")
             # print(type(list_all_path_and_metadata),list_all_path_and_metadata)
             print("get the metadata")
-            return list_all_path_and_metadata
+            return self.list_all_path_and_metadata
         except Exception as e:
             logging.error(f"the function not return the metadata{e}")
 
