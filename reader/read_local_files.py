@@ -20,28 +20,30 @@ class Read_local_files:
             for entry in self.file_path.iterdir():
                 if entry.is_file():  # Check if it's a file
                     file_paths.append(str(entry.resolve()))
+                    print(str(entry.resolve()))
             logging.info(f"read file paths successfully{file_paths}")
+            print("read the data")
             return file_paths
         except Exception as e:
             logging.error(e)
             raise e
-
-    def get_wav_metadata(self):
-
-        try:
-            with wave.open(str(self.file_path), 'rb') as wf:
-                metadata = {
-                    "nchannels": wf.getnchannels(),
-                    "sampwidth": wf.getsampwidth(),
-                    "framerate": wf.getframerate(),
-                    "nframes": wf.getnframes(),
-                    "comptype": wf.getcomptype(),
-                    "compname": wf.getcompname()
-                }
-                return metadata
-        except wave.Error as e:
-            print(f"Error reading WAV file {self.file_path}: {e}")
-            return None
+    #
+    # def get_wav_metadata(self):
+    #
+    #     try:
+    #         with wave.open(str(self.file_path), 'rb') as wf:
+    #             metadata = {
+    #                 "nchannels": wf.getnchannels(),
+    #                 "sampwidth": wf.getsampwidth(),
+    #                 "framerate": wf.getframerate(),
+    #                 "nframes": wf.getnframes(),
+    #                 "comptype": wf.getcomptype(),
+    #                 "compname": wf.getcompname()
+    #             }
+    #             return metadata
+    #     except wave.Error as e:
+    #         print(f"Error reading WAV file {self.file_path}: {e}")
+    #         return None
 
 # example
 # r = Read_local_files(wav_path)

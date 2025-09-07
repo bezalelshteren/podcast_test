@@ -1,0 +1,44 @@
+from kafka_producer.producer import Producer
+from reader.read_local_files import Read_local_files
+from get_The_metadata.get_metadata import Get_metadata
+from pathlib import Path
+from dotenv import load_dotenv
+import logging
+import os
+
+
+load_dotenv()
+
+topic_name = os.getenv("TOPIC_NAME")
+wav_path = Path(os.getenv("PATH_TO_FILES"))
+
+class Manager:
+    def __init__(self,path,topic):
+        self.reader = Read_local_files(path)
+        self.get_metadata = Get_metadata()
+        self.producer = Producer()
+        self.topic_name = topic
+
+    def start_all_proces(self):
+        try:
+            mass = []
+            print("start all proces")
+            all_paths = self.reader.read_the_all_paths()
+            all_path_and_metadata = self.get_metadata.get_the_metadata(all_paths)
+            # print(all_path_and_metadata)
+            for massage in all_path_and_metadata:
+                for key,value in massage.items():
+                    mass.append(key)
+                    mass.append(value)
+                    # self.producer.publish_message(self.topic_name,mass)
+                    # logging.info(f"publish {massage}")
+                    print(massage)
+                break
+            print("Finish all publish")
+            logging.info("connect_to_producer")
+        except Exception as e:
+            logging.error(f"not publish")
+
+
+manage = Manager(wav_path,topic_name)
+manage.start_all_proces()
