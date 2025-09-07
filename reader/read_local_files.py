@@ -20,8 +20,6 @@ class Read_local_files:
             for entry in self.file_path.iterdir():
                 if entry.is_file():  # Check if it's a file
                     file_paths.append(str(entry.resolve()))
-
-            print(file_paths)
             logging.info(f"read file paths successfully{file_paths}")
             return file_paths
         except Exception as e:
@@ -46,8 +44,8 @@ class Read_local_files:
             return None
 
 # example
-r = Read_local_files(wav_path)
-json_output = r.read_the_all_paths()
-print(json_output)
+# r = Read_local_files(wav_path)
+# json_output = r.read_the_all_paths()
+# print(json_output)
 # metadata = r.get_wav_metadata()
 # print(metadata)
