@@ -32,12 +32,13 @@ class Get_metadata:
                 json_metadata["path"] = str(path)
                 json_metadata["metadata"] = self.get_wav_metadata(path)
                 self.list_all_path_and_metadata.append(json_metadata)
-                logging.info(f"the function get metadata {self.list_all_path_and_metadata}")
+                # logging.info(f"the function get metadata {self.list_all_path_and_metadata}")
 
             print("get the metadata")
             return self.list_all_path_and_metadata
         except Exception as e:
-            logging.error(f"the function not return the metadata{e}")
+            print()
+            # logging.error(f"the function not return the metadata{e}")
 
 
 

@@ -1,9 +1,8 @@
-from kafka_producer.producer import Producer
-from reader.read_local_files import Read_local_files
-from get_The_metadata.get_metadata import Get_metadata
+from manager_the_read_and_send.producer import Producer
+from manager_the_read_and_send.read_local_files import Read_local_files
+from manager_the_read_and_send.get_metadata import Get_metadata
 from pathlib import Path
 from dotenv import load_dotenv
-from loger.loges_to_a_file import Logger
 # loger = Logger.get_logger()
 import os
 

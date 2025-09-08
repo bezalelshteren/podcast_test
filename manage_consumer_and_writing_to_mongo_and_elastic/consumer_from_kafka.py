@@ -28,7 +28,8 @@ class Consumer:
 
         return consumer
 
-# a = Consumer(topic_name,"audio")
+# a = Consumer(topic_name,"aunjjjjdio")
+# print("cdccccccccc")
 # p = a.get_consumer_events()
 # for e in p:
 #     print(e)

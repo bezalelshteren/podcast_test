@@ -1,7 +1,7 @@
-from consumer.consumer_from_kafka import Consumer
-from hashcode.create_a_hash_for_the_massages import Create_hash
-from writing_to_mongo.write_to_mongo import MongoWriter
-from write_to_ekasticserch.writing_to_elastic import Crud_elastic
+from manage_consumer_and_writing_to_mongo_and_elastic.consumer_from_kafka import Consumer
+from manage_consumer_and_writing_to_mongo_and_elastic.create_a_hash_for_the_massages import Create_hash
+from manage_consumer_and_writing_to_mongo_and_elastic.write_to_mongo import MongoWriter
+from manage_consumer_and_writing_to_mongo_and_elastic.writing_to_elastic import Crud_elastic
 from read_path_to_bin import Read_to_bin
 from dotenv import load_dotenv
 import os
@@ -29,8 +29,6 @@ class Manage_consumer:
             data = podcaste.value
             content = self.reader.reader(data["path"])
             hash_to_id = self.create_hash.made_a_hash(str(content))
-            print(hash_to_id)
-            print(type(hash_to_id))
             status = self.write_to_mongo.insert_event(content,hash_to_id)
             is_insert = self.write_to_elastic.insert_massage(hash_to_id,data["metadata"])
             print(status)
