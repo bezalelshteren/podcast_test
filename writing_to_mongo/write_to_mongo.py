@@ -1,22 +1,30 @@
 import os
 import pymongo
 from gridfs import GridFS
-from loger.loges_to_a_file import logging
-# gridefs
+# from loger.loges_to_a_file import Logger
+# loger = Logger.get_logger()
+
+
 
 class MongoWriter:
     def __init__(self):
         self.uri = os.getenv("MONGO_CONN")
         self.client = pymongo.MongoClient(self.uri)
         self.db = self.client[os.getenv("MONGO_DB")]
-        self.col = self.db[os.getenv("COLLECTION_NAME")]
+        self.gridfs = GridFS(self.db)
 
-    def insert_event(self,message):
-        if isinstance(message,dict):
-            doc = message
-        else:
-            doc = {"value": message.value}
-        return self.col.insert_one(doc)
+    def insert_event(self,message,hash_id):
+        if self.gridfs.exists(hash_id):
+            return self.gridfs.get(hash_id)
+        status = self.gridfs.put(message,_id=hash_id)
+        return status
+
+
+
+
+
+
+
 
     #
     # client = MongoClient('mongodb://localhost:27017/')

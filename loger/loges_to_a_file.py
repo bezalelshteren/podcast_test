@@ -1,40 +1,32 @@
 import logging
+from elasticsearch import Elasticsearch
+from datetime import datetime
 
 
-logging.basicConfig(
-    filename="logger.log",
-    filemode="a",
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    level=logging.INFO
-)
+class Logger:
+    _logger = None
 
-# import logging
-# import os
-#
-#
-# LOG_DIR = "logs"
-# os.makedirs(LOG_DIR, exist_ok=True)
-#
-# LOG_FILE = os.path.join(LOG_DIR, "app.log")
-#
-#
-# def get_logger(name: str) -> logging.Logger:
-#
-#     logger = logging.getLogger(name)
-#     logger.setLevel(logging.DEBUG)
-#
-#     if not logger.handlers:
-#         formatter = logging.Formatter(
-#             "[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s",
-#             datefmt="%Y-%m-%d %H:%M:%S",
-#         )
-#         console_handler = logging.StreamHandler()
-#         console_handler.setFormatter(formatter)
-#         logger.addHandler(console_handler)
-#
-#         # כתיבה לקובץ
-#         file_handler = logging.FileHandler(LOG_FILE)
-#         file_handler.setFormatter(formatter)
-#         logger.addHandler(file_handler)
-#
-#     return logger
+    @classmethod
+    def get_logger(cls, name="your_logger_name", es_host="your_es_host_name",
+        index="your_index_logs_name", level=logging.DEBUG):
+        if cls._logger:
+            return cls._logger
+        logger = logging.getLogger(name)
+        logger.setLevel(level)
+        if not logger.handlers:
+            es = Elasticsearch(es_host)
+            class ESHandler(logging.Handler):
+                def emit(self, record):
+                    try:
+                        es.index(index=index, document={
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "level": record.levelname,
+                        "logger": record.name,
+                        "message": record.getMessage()
+                        })
+                    except Exception as e:
+                        print(f"ES log failed: {e}")
+            logger.addHandler(ESHandler())
+            logger.addHandler(logging.StreamHandler())
+            cls._logger = logger
+            return logger

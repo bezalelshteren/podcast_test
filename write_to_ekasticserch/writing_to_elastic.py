@@ -1,18 +1,14 @@
-import os
-from dotenv import load_dotenv
-from elasticsearch import Elasticsearch,helpers
-from elasticsearch.helpers import scan
-from loger.loges_to_a_file import logging
-load_dotenv()
+from elasticsearch import Elasticsearch
+# from loger.loges_to_a_file import Logger
+# loger = Logger.get_logger()
 
-
-indices_name = os.getenv("INDEX_NAME")
 
 
 class Crud_elastic:
-    def __init__(self, elastic_url):
+    def __init__(self, elastic_url,index_name):
         self.es = Elasticsearch(elastic_url)
-        self.index_name = indices_name
+        self.index_name = index_name
+        print(self.es.info)
 
     @staticmethod
     def create_mapping(mapping=None):
@@ -23,25 +19,21 @@ class Crud_elastic:
 
     def create_index(self):
         try:
-            if self.es.indices.exists(index=self.index_name):
-                self.es.indices.delete(index=self.index_name)
             if not self.es.indices.exists(index=self.index_name):
-                self.es.indices.create(index=self.index_name,mappings=self.create_mapping())
+                self.es.indices.create(index=self.index_name)
 
             mapping = self.es.indices.get_mapping(index=self.index_name)
-            print(mapping)
             return mapping
         except Exception as e:
             raise e
 
-    def insert_all(self,list_of_podcast):
+    def insert_massage(self,hash_id,metadata_to_insert):
         try:
-
-            insert_one = [{"_index": self.index_name,"_id": myhash,"_source":podcast}
-            for myhash ,podcast in enumerate(list_of_podcast)]
-
-            helpers.bulk(self.es,insert_one )
+            document = {"metadata":metadata_to_insert}
+            is_inserted = self.es.index(index=self.index_name,id=hash_id,body=document)
             self.es.indices.refresh(index=self.index_name)
+            print(is_inserted)
             return self.es.count()
         except Exception as e:
-            raise e
+            print()
+            # loger.error(f"the document is not inserted {e}")

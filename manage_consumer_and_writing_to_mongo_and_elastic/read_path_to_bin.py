@@ -1,10 +1,10 @@
+# from loger.loges_to_a_file import Logger
+# loger = Logger.get_logger()
 
 
 class Read_to_bin:
-    def __init__(self):
-        self.content = None
-
-    def reader(self,path):
+    @staticmethod
+    def reader(path):
         with open(path,"rb")as fb:
-            self.content = fb.read()
-        return self.content
+            content = fb.read()
+        return content

@@ -2,7 +2,9 @@ from kafka import KafkaConsumer
 from dotenv import load_dotenv
 import os
 import json
-from loger.loges_to_a_file import logging
+# from loger.loges_to_a_file import Logger
+# loger = Logger.get_logger()
+
 
 load_dotenv()
 
@@ -20,7 +22,6 @@ class Consumer:
             self.topic ,
             value_deserializer=lambda m: json.loads(m.decode('utf-8')),
             bootstrap_servers=['localhost:9092'],
-
             auto_offset_reset='earliest',
             group_id= self.group
         )

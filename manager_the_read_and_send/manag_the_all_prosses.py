@@ -3,7 +3,8 @@ from reader.read_local_files import Read_local_files
 from get_The_metadata.get_metadata import Get_metadata
 from pathlib import Path
 from dotenv import load_dotenv
-from loger.loges_to_a_file import logging
+from loger.loges_to_a_file import Logger
+# loger = Logger.get_logger()
 import os
 
 
@@ -28,12 +29,12 @@ class Manager:
             for massage in all_path_and_metadata:
                 self.producer.publish_message(self.topic_name,massage)
                 print(f"publish {massage}")
-                logging.info(f"publish {massage}")
+                # logging.info(f"publish {massage}")
             print("Finish all publish")
-            logging.info("connect_to_producer")
+            # logging.info("connect_to_producer")
         except Exception as e:
-            logging.error(f"not publish")
-
+            # logging.error(f"not publish")
+            print()
 
 manage = Manager(wav_path,topic_name)
 manage.start_all_proces()

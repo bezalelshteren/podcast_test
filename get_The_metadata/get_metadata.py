@@ -1,14 +1,9 @@
 import wave
-# from loger.loges_to_a_file import logging
-# from reader.read_local_files import Read_local_files
 from pathlib import Path
-# from dotenv import load_dotenv
-# import os
+from loger.loges_to_a_file import Logger
+# loger = Logger.get_logger()
+
 ROOT_PATH = Path(__file__).resolve().parent
-import logging
-# load_dotenv()
-#
-# wav_path = Path(os.getenv("PATH_TO_FILES"))
 
 
 class Get_metadata:
@@ -34,7 +29,7 @@ class Get_metadata:
             for path in list_of_path:
                 json_metadata = {}
                 path = Path(path)
-                json_metadata["path"] = path
+                json_metadata["path"] = str(path)
                 json_metadata["metadata"] = self.get_wav_metadata(path)
                 self.list_all_path_and_metadata.append(json_metadata)
                 logging.info(f"the function get metadata {self.list_all_path_and_metadata}")
