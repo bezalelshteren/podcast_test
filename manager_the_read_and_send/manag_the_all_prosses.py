@@ -1,8 +1,9 @@
-from manager_the_read_and_send.producer import Producer
-from manager_the_read_and_send.read_local_files import Read_local_files
-from manager_the_read_and_send.get_metadata import Get_metadata
+from producer import Producer
+from read_local_files import Read_local_files
+from get_metadata import Get_metadata
 from pathlib import Path
 from dotenv import load_dotenv
+from loger.loges_to_a_file import Logger
 # loger = Logger.get_logger()
 import os
 
@@ -14,6 +15,7 @@ wav_path = Path(os.getenv("PATH_TO_FILES"))
 
 class Manager:
     def __init__(self,path,topic):
+        self.loger = Logger.get_logger()
         self.reader = Read_local_files(path)
         self.get_metadata = Get_metadata()
         self.producer = Producer()
@@ -21,40 +23,19 @@ class Manager:
 
     def start_all_proces(self):
         try:
-            print("start all proces")
+            self.loger.info("start all proces to read and send to kafka")
             all_paths = self.reader.read_the_all_paths()
             all_path_and_metadata = self.get_metadata.get_the_metadata(all_paths)
 
             for massage in all_path_and_metadata:
                 self.producer.publish_message(self.topic_name,massage)
-                print(f"publish {massage}")
-                # logging.info(f"publish {massage}")
-            print("Finish all publish")
-            # logging.info("connect_to_producer")
+
+            self.loger.info("connect_to_producer")
         except Exception as e:
-            # logging.error(f"not publish")
-            print()
-
-manage = Manager(wav_path,topic_name)
-manage.start_all_proces()
+            self.loger.error(f"not publish")
 
 
-# def start_all_proces(self):
-#     try:
-#         mass = []
-#         print("start all proces")
-#         all_paths = self.reader.read_the_all_paths()
-#         all_path_and_metadata = self.get_metadata.get_the_metadata(all_paths)
-#         # print(all_path_and_metadata)
-#         for massage in all_path_and_metadata:
-#             for key, value in massage.items():
-#                 mass.append(key)
-#                 mass.append(value)
-#                 # self.producer.publish_message(self.topic_name,mass)
-#                 # logging.info(f"publish {massage}")
-#                 print(mass)
-#             break
-#         print("Finish all publish")
-#         logging.info("connect_to_producer")
-#     except Exception as e:
-#         logging.error(f"not publish")
+if __name__ == "__main__":
+    manage = Manager(wav_path,topic_name)
+    manage.start_all_proces()
+    manage.loger.info("Finish all publish")

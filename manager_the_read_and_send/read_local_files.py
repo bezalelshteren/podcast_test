@@ -3,13 +3,14 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 ROOT_PATH = Path(__file__).resolve().parent
-# loger = Logger.get_logger()
+
 load_dotenv()
 
 wav_path = Path(os.getenv("PATH_TO_FILES"))
 
 class Read_local_files:
     def __init__(self,path):
+        self.loger = Logger.get_logger()
         self.file_path = path
         self.all_data = None
 
@@ -19,9 +20,8 @@ class Read_local_files:
             for entry in self.file_path.iterdir():
                 if entry.is_file():
                     file_paths.append(str(entry.resolve()))
-            # logging.info(f"read file paths successfully{file_paths}")
-            print("read the data")
+            self.loger.info(f"read file paths successfully{file_paths}")
+
             return file_paths
         except Exception as e:
-            # logging.error(e)
-            raise e
+            self.loger.error(f"read the files didnt work: {e}")
