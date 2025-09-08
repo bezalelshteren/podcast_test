@@ -10,22 +10,24 @@ topic_name = os.getenv("TOPIC_NAME")
 
 
 class Consumer:
-    def __init__(self,topic,group):#group
+    def __init__(self,topic,group):
         self.topic = topic
         self.group = group
 
 
     def get_consumer_events(self):
         consumer = KafkaConsumer(
-        # insert hear the topics ,
+            self.topic ,
             value_deserializer=lambda m: json.loads(m.decode('utf-8')),
             bootstrap_servers=['localhost:9092'],
 
             auto_offset_reset='earliest',
-            # group_id= insert hear the group name
+            group_id= self.group
         )
 
         return consumer
 
-a = Consumer("topic_name","audio")
-a.get_consumer_events()
+# a = Consumer(topic_name,"audio")
+# p = a.get_consumer_events()
+# for e in p:
+#     print(e)
