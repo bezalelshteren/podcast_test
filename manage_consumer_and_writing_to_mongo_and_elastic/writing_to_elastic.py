@@ -1,7 +1,10 @@
 from elasticsearch import Elasticsearch,helpers
 from elasticsearch.helpers import scan
 from loger.loges_to_a_file import Logger
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class Crud_elastic:
     def __init__(self, elastic_url,index_name):
@@ -34,18 +37,17 @@ class Crud_elastic:
         except Exception as e:
             self.loger.error(f"not create a index {e}")
 
-    def search_by_query(self,query=None):
-        # try:
-            # resp = self.es.get(index="test-index", id=1)
-            # print(resp['_source'])
-            # all_documents = None
-            # all_documents = self.es.search(index=self.index_name, query=query)
-            # if all_documents is None:
-            all_documents = [hit  for hit in scan(self.es, query={"query":{"match_all":{}}},_source=True, index=self.index_name)]
-
-            return all_documents
-        # except Exception as e:
-        #     self.loger.error(f"{query} not return a document")
+    def search_by_query(self,document_id):
+        try:
+            response = self.es.get(index=self.index_name, id=document_id)
+            if response["found"]:
+                self.loger.info(f"{response["found"]} is the doc whet we need to update")
+                return response
+            else:
+                self.loger.error(f"{document_id} not return a document")
+                return None
+        except Exception as e:
+            self.loger.error(f"{document_id} not return a document")
 
     def insert_massage(self,hash_id,metadata_to_insert):
         try:
@@ -59,9 +61,7 @@ class Crud_elastic:
     def update_document(self,doc_id,update_doc):
         try:
             res_update = self.es.update(index=self.index_name, id=doc_id, body=update_doc)
-            self.loger.info(f"{res_update} is updated")
             return f"{res_update} is updated"
         except Exception as e:
             self.loger.error(f"{update_doc} is not updated")
-
 
