@@ -37,6 +37,16 @@ class Crud_elastic:
         except Exception as e:
             self.loger.error(f"not create a index {e}")
 
+
+    def search_by_multy_query(self,query):
+        # try:
+            response = self.es.search(index=self.index_name,query=query)
+            self.loger.info(f"{query} return this {response}")
+            return response
+        # except Exception as e:
+        #     self.loger.error(f"{query} dosent work")
+
+
     def search_by_query(self,document_id):
         try:
             response = self.es.get(index=self.index_name, id=document_id)
@@ -51,6 +61,11 @@ class Crud_elastic:
 
     def insert_massage(self,hash_id,metadata_to_insert):
         try:
+            #לטפל בהכנסה שיהיה לפי שדות ולהוסיף לMAP גם את השדות שאני מכניס מאוחר יותר
+
+            size = metadata_to_insert["file_size_bytes"]
+            name = metadata_to_insert["file_name"]
+            creation_time = metadata_to_insert["time_creation"]
             document = {"metadata":metadata_to_insert}
             self.es.index(index=self.index_name,id=hash_id,body=document)
             self.loger.info(self.es.count())

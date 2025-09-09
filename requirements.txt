@@ -1,0 +1,7 @@
+elasticsearch~=8.13.0
+DateTime~=5.5
+dotenv~=0.9.9
+python-dotenv~=1.1.1
+SpeechRecognition~=3.14.3
+kafka-python~=2.2.15
+pymongo~=4.14.1
