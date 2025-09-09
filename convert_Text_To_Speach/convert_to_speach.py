@@ -1,23 +1,27 @@
-from pyaudio import PyAudio
-
-
-path = r"C:\Users\User\Downloads\podcasts\podcasts\download (1).wav"
-
 import speech_recognition as sr
-
-# obtain path to "english.wav" in the same folder as this script
-# from os import path
+from loger.loges_to_a_file import Logger
 
 
-audio = sr.AudioData.from_file(path)
+path_file = r"C:\Users\User\Downloads\podcasts\podcasts\download (1).wav"
 
 
+class Speach_to_text:
+    def __init__(self):
+        self.loger = Logger.get_logger()
+        self.recognizer = sr.Recognizer()
+        self.text = None
 
-r = sr.Recognizer()
-# harvard = sr.AudioFile(path)
-# with harvard as source:
-#     audio = r.record(source)
-jackhammer = sr.AudioFile(path)
-# with jackhammer as source:
-#     audio = r.record(source)
-print(str(audio))
+    def try_to_read(self,path):
+        try:
+            with sr.AudioFile(path) as audio_file:
+                audio = self.recognizer.record(audio_file)
+            self.text = self.recognizer.recognize_google(audio)
+            self.loger.info(f"this is the texst of the wav file :{self.text}")
+            return self.text
+        except Exception as e:
+            self.loger.error("connet convert rom speach to text")
+            return None
+
+
+# s= Speach_to_text(path_file)
+# s.try_to_read()

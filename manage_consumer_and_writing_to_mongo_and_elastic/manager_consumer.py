@@ -15,7 +15,7 @@ indices_name = os.getenv("INDEX_NAME")
 elasticserch_url = os.getenv("ELASTIC_URL","http://localhost:9200")
 
 class Manage_consumer:
-    def __init__(self,topic,group_name,elast_url,name_index):
+    def __init__(self,topic=topic_name,group_name=group,elast_url=elasticserch_url,name_index=indices_name):
         self.consumer = Consumer(topic,group_name)
         self.create_hash = Create_hash()
         self.write_to_mongo = MongoWriter()
@@ -23,15 +23,16 @@ class Manage_consumer:
         self.write_to_elastic = Crud_elastic(elast_url,name_index)
         self.write_to_elastic.create_index()
         self.loger = Logger.get_logger()
+        self.hash_to_id = None
 
     def send_the_data_to_mongo_and_the_metadata_to_elastic(self):
         try:
             for podcaste in self.consumer.get_consumer_events():
                 data = podcaste.value
                 content = self.reader.reader(data["path"])
-                hash_to_id = self.create_hash.made_a_hash(str(content))
-                status = self.write_to_mongo.insert_event(content,hash_to_id)
-                self.write_to_elastic.insert_massage(hash_to_id,data["metadata"])
+                self.hash_to_id = self.create_hash.made_a_hash(str(content))
+                status = self.write_to_mongo.insert_event(content,self.hash_to_id)
+                self.write_to_elastic.insert_massage(self.hash_to_id,data["metadata"])
                 self.loger.info(f"{status}: is writing to mongo")
                 # self.loger.info("is writing correctly to elastic search")
         except Exception as e:
