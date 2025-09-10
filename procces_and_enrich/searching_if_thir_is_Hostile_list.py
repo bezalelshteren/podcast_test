@@ -21,15 +21,55 @@ class Searching_in_elastic:
         self.loger = Logger.get_logger()
         self.list_hostile_words_to_check = self.decoder.decoding(hostile_list)
         self.list_less_hostile_words_to_check = self.decoder.decoding(less_hostile_list)
+        score_of_less_hostile_words = {}
+        score_of_hostile_words = {}
 
-    def search_words(self,doc_id):
+    def search_words(self):
         for word in self.list_hostile_words_to_check:
-            query_body = {"query": {"bool": {"filter": [{
-                "term": {"_id": doc_id}}],"must": [
-                {"match": {"text_from_wav": word}}]}}}
+            query_body = {"query":{"match_phrase":{"content":word}}}
             e = self.elastic.search_by_multy_query(query_body)
             print(e)
 
 
-# search = Searching_in_elastic(elasticserch_url,indices_name)
+    def get_all_docs_from_elastic(self):
+        all_docs = self.elastic.get_all_doc()
+        print(all_docs)
+        return all_docs
+
+    def check_the_score_in_every_doc(self,list_hostile_words,doc,list_of_score):
+            text = doc["_source"]["text_from_wav"]
+            length = len(text)
+            the_words_we_find = {}
+            for word in list_hostile_words:
+                if word in text:
+                    if word in the_words_we_find:
+                        the_words_we_find[word] +=1
+                    else:
+                        the_words_we_find[word] = 1
+                else:
+                    the_words_we_find[word] = 0
+                the_words_we_find[word] = the_words_we_find[word]/length
+                if not list_of_score[word]:
+                    list_of_score[word] = 0
+                list_of_score[word] += the_words_we_find[word]
+            return the_words_we_find
+
+
+    def insert_the_new_fields(self):
+        if_thir_is_a_word = False
+        score = 0
+        score_of_all_docs = {}
+        all_docs = self.get_all_docs_from_elastic()
+        for doc in all_docs:
+            score_of_doc = self.check_the_score_in_every_doc(self.list_hostile_words_to_check,doc,self.list_hostile_words_to_check)
+            if len(score_of_doc.keys()) > 0:
+                if_thir_is_a_word = True
+            for word, score_docs in score_of_doc.items():
+                if word in score_of_all_docs:
+                    score_of_all_docs[word] += score_docs
+                score += score_docs * score_of_all_docs[word]
+
+search = Searching_in_elastic(elasticserch_url,indices_name)
 # search.search_words()
+# search.search_words_in_doc(search.list_hostile_words_to_check,)
+search.get_all_docs_from_elastic()

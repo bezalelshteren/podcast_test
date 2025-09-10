@@ -15,7 +15,7 @@ class Read_the_text_from_kafka_and_write_to_elastic:
         self.writing_to_elastic = Crud_elastic(elastic_url,index_name)
 
     def write_the_text_to_elastic(self):
-        try:
+        # try:
             for massage in self.consumer.get_consumer_events():
                 data = massage.value
                 print(type(data["massage"]),data["massage"])
@@ -26,8 +26,9 @@ class Read_the_text_from_kafka_and_write_to_elastic:
                 doc_to_apdate = self.writing_to_elastic.search_by_query(hash_id)
                 status = self.writing_to_elastic.update_document(hash_id,{"doc":{"text_from_wav":data["massage"]}})
                 self.loger.info(f"{status}")
-        except Exception as e:
-            self.loger.error("didnt work to insert the text to elastic")
+                print(doc_to_apdate)
+        # except Exception as e:
+        #     self.loger.error("didnt work to insert the text to elastic")
 
 
 

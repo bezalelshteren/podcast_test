@@ -1,6 +1,6 @@
 import os
 import pymongo
-from gridfs import GridFS
+from gridfs import GridFS, GridFSBucket
 from loger.loges_to_a_file import Logger
 
 
@@ -23,3 +23,19 @@ class MongoWriter:
             return status
         except Exception as e:
             self.loger.error(f" cent writing to mongo: {e}")
+
+    def connect_and_read(self):
+        fs = GridFSBucket(self.db)
+
+        for file_document in fs.find({}):
+            print(file_document._id)
+        return fs
+        # return self.gridfs.get()
+        # my_db = self.client[self.db_name]
+        # my_coll = my_db[self.collection_name]
+        # data = my_coll.find()
+        #
+
+
+# m = MongoWriter()
+# m.connect_and_read()

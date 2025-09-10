@@ -37,6 +37,9 @@ class Crud_elastic:
         except Exception as e:
             self.loger.error(f"not create a index {e}")
 
+    def get_all_doc(self):
+        all_documents = [hit for hit in scan(self.es, query={"query": {"match_all": {}}}, _source=True, index=self.index_name)]
+        return all_documents
 
     def search_by_multy_query(self,query):
         # try:
@@ -74,9 +77,9 @@ class Crud_elastic:
 
 
     def update_document(self,doc_id,update_doc):
-        try:
+        # try:
             res_update = self.es.update(index=self.index_name, id=doc_id, body=update_doc)
             return f"{res_update} is updated"
-        except Exception as e:
-            self.loger.error(f"{update_doc} is not updated")
+        # except Exception as e:
+        #     self.loger.error(f"{update_doc} is not updated")
 
