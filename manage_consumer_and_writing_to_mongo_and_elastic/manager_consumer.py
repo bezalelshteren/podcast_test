@@ -34,9 +34,9 @@ class Manage_consumer:
                 status = self.write_to_mongo.insert_event(content,self.hash_to_id)
                 self.write_to_elastic.insert_massage(self.hash_to_id,data["metadata"])
                 self.loger.info(f"{status}: is writing to mongo")
-                # self.loger.info("is writing correctly to elastic search")
         except Exception as e:
             self.loger.error(f"not success to read from kafka and send to mongo and elastic search{e}")
+
 
 if __name__ == "__main__":
     manage = Manage_consumer(topic_name,group,elasticserch_url,indices_name)
