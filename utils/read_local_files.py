@@ -25,5 +25,5 @@ class Read_local_files:
         except Exception as e:
             self.loger.error(f"read the files didnt work: {e}")
 
-r = Read_local_files(wav_path)
-r.read_the_all_paths()
+# r = Read_local_files(wav_path)
+# r.read_the_all_paths()

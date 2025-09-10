@@ -1,8 +1,8 @@
-from consumer_from_kafka import Consumer
-from create_a_hash_for_the_massages import Create_hash
+from utils.consumer_from_kafka import Consumer
+from utils.create_a_hash_for_the_massages import Create_hash
 from write_to_mongo import MongoWriter
-from writing_to_elastic import Crud_elastic
-from read_path_to_bin import Read_to_bin
+from utils.writing_to_elastic import Crud_elastic
+from utils.read_path_to_bin import Read_to_bin
 from dotenv import load_dotenv
 from loger.loges_to_a_file import Logger
 import os
@@ -41,3 +41,5 @@ class Manage_consumer:
 if __name__ == "__main__":
     manage = Manage_consumer(topic_name,group,elasticserch_url,indices_name)
     manage.send_the_data_to_mongo_and_the_metadata_to_elastic()
+    loger = Logger.get_logger()
+    loger.info("==============================================")

@@ -1,4 +1,4 @@
-version: "3.9"
+#version: "3.9"
 
 services:
   # Kafka broker
@@ -40,14 +40,47 @@ services:
     networks:
       - my_network
 
-  # MongoDB מקומי
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: elasticsearch
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+#    volumes:
+#      - es_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - my_network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - my_network
+
   mongo:
     image: mongo:6
     container_name: mongo
     ports:
       - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
+#    volumes:
+#      - mongo_data:/data/db
     networks:
       - my_network
 
@@ -80,90 +113,49 @@ services:
         condition: service_started
       manager_the_read_and_send:
         condition: service_started
+      elasticsearch:
+        condition: service_healthy
+    volumes:
+      - ."C:\Users\User\Downloads\podcasts\podcasts":app
     networks:
       - my_network
 
 
-  convert_Text_To_Speach:
+  convert_text_to_speach:
     build:
       context: .
-      dockerfile: ./convert_Text_To_Speach/Dockerfile
+      dockerfile: convert_text_to_speach/Dockerfile
     env_file:
       - .env
     depends_on:
       kafka:
         condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - my_network
+    volumes:
+      - ."C:\Users\User\Downloads\podcasts\podcasts":app
+
+
+  procces_and_enrich:
+    build:
+      context: .
+      dockerfile: ./procces_and_enrich/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      mongo:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      convert_text_to_speach:
+        condition: service_started
     networks:
       - my_network
 
-
-#  procces_and_enrich:
-#    build:
-#      context: .
-#      dockerfile: ./procces_and_enrich/Dockerfile
-#    env_file:
-#      - .env
-#    depends_on:
-#      mongo:
-#        condition: service_started
-#      kafka:
-#        condition: service_healthy
-#      enricher:
-#        condition: service_started
-#    networks:
-#      - my_network
-#
-#  # FastAPI - שולח ללקוח מה-Mongo המקומי
-#  retrieve_from_db:
-#    build:
-#      context: .
-#      dockerfile: ./app_read_from_mongo/Dockerfile
-#    env_file:
-#      - .env
-#    depends_on:
-#      mongo:
-#        condition: service_started
-#      write_to_mongo:
-#        condition: service_started
-#    ports:
-#      - "8008:8008"
-#    networks:
-#      - my_network
-
-
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
-    container_name: elasticsearch
-    environment:
-      - node.name=es01
-      - cluster.name=es-docker-cluster
-      - discovery.type=single-node
-      - bootstrap.memory_lock=true
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
-      - xpack.security.enabled=false
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.13.4
-    container_name: kibana
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports:
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
-
-
-volumes:
-  - "C:\Users\User\Downloads\podcasts\podcasts"
 networks:
   my_network:
     driver: bridge

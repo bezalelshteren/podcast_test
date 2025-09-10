@@ -11,4 +11,4 @@ COPY loger/ ./loger
 COPY manager_the_read_and_send/ .
 COPY utils/ ./utils
 
-CMD ["python", "manager.py"]
+CMD ["python", "manag_the_all_prosses.py"]

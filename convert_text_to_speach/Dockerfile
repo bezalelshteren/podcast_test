@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 
 COPY loger/ ./loger
-COPY manage_consumer_and_writing_to_mongo_and_elastic/ .
+COPY convert_text_to_speach/ .
 COPY utils/ ./utils
 
-CMD ["python", "manager_consumer.py"]
+CMD ["python", "manager.py"]

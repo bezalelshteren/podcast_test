@@ -1,7 +1,7 @@
-from manage_consumer_and_writing_to_mongo_and_elastic.writing_to_elastic import Crud_elastic
+from utils.writing_to_elastic import Crud_elastic
 from loger.loges_to_a_file import Logger
 from procces_and_enrich.decoding_the_Hostile_list import Decoding_hostile_list
-from manager_the_read_and_send.producer import Producer
+from utils.producer import Producer
 from dotenv import load_dotenv
 import os
 
@@ -21,55 +21,59 @@ class Searching_in_elastic:
         self.loger = Logger.get_logger()
         self.list_hostile_words_to_check = self.decoder.decoding(hostile_list)
         self.list_less_hostile_words_to_check = self.decoder.decoding(less_hostile_list)
-        score_of_less_hostile_words = {}
-        score_of_hostile_words = {}
+        self.score_of_all_docs = 0
 
-    def search_words(self):
-        for word in self.list_hostile_words_to_check:
-            query_body = {"query":{"match_phrase":{"content":word}}}
-            e = self.elastic.search_by_multy_query(query_body)
-            print(e)
-
-
-    def get_all_docs_from_elastic(self):
-        all_docs = self.elastic.get_all_doc()
-        print(all_docs)
-        return all_docs
-
-    def check_the_score_in_every_doc(self,list_hostile_words,doc,list_of_score):
-            text = doc["_source"]["text_from_wav"]
+    def check_the_score_in_every_doc(self,list_hostile_words,text):
+            the_score_of_this_doc = 0
             length = len(text)
-            the_words_we_find = {}
+            the_num_words_we_find = 0
             for word in list_hostile_words:
                 if word in text:
-                    if word in the_words_we_find:
-                        the_words_we_find[word] +=1
-                    else:
-                        the_words_we_find[word] = 1
-                else:
-                    the_words_we_find[word] = 0
-                the_words_we_find[word] = the_words_we_find[word]/length
-                if not list_of_score[word]:
-                    list_of_score[word] = 0
-                list_of_score[word] += the_words_we_find[word]
-            return the_words_we_find
+                    the_num_words_we_find +=1
+                the_score_of_this_doc = the_num_words_we_find / length
+            self.loger.info("check_the_score_in_every_doc")
+            return the_score_of_this_doc
 
 
-    def insert_the_new_fields(self):
-        if_thir_is_a_word = False
-        score = 0
-        score_of_all_docs = {}
-        all_docs = self.get_all_docs_from_elastic()
-        for doc in all_docs:
-            score_of_doc = self.check_the_score_in_every_doc(self.list_hostile_words_to_check,doc,self.list_hostile_words_to_check)
-            if len(score_of_doc.keys()) > 0:
-                if_thir_is_a_word = True
-            for word, score_docs in score_of_doc.items():
-                if word in score_of_all_docs:
-                    score_of_all_docs[word] += score_docs
-                score += score_docs * score_of_all_docs[word]
+    def calculate_all_scores(self):
+        for doc in self.elastic.get_all_doc():
+            score_of_doc = self.check_the_score_in_every_doc(self.list_hostile_words_to_check,doc["text_from_wav"])
+            score_of_doc += self.check_the_score_in_every_doc(self.list_less_hostile_words_to_check,doc)/2
+            self.score_of_all_docs += score_of_doc
+        self.loger.info(f"this is the score of all docs calculate together{self.score_of_all_docs}")
+        return self.score_of_all_docs
 
-search = Searching_in_elastic(elasticserch_url,indices_name)
-# search.search_words()
-# search.search_words_in_doc(search.list_hostile_words_to_check,)
-search.get_all_docs_from_elastic()
+    def divides_the_score_by_proficiency_level(self,score_of_doc):
+            cat_to_risk = self.score_of_all_docs /4
+            self.loger.info("divides_the_score_by_proficiency_level")
+            if score_of_doc > cat_to_risk * 3:
+                return "high_risk",score_of_doc
+            elif score_of_doc > cat_to_risk * 2:
+                return "medium_risk",score_of_doc
+            elif score_of_doc > cat_to_risk * 1:
+                return "low_risk",score_of_doc
+            else:
+                return None,score_of_doc
+
+
+    def insert_new_fields(self):
+        try:
+            for doc in self.elastic.get_all_doc():
+                doc_id = doc["_id"]
+                doc_text = doc["_source"]["text_from_wav"]
+                is_bds = True
+                score_of_doc = self.check_the_score_in_every_doc(self.list_hostile_words_to_check, doc_text)
+                score_of_doc += self.check_the_score_in_every_doc(self.list_less_hostile_words_to_check, doc_text) / 2
+                bds_threat_level, bds_percent= self.divides_the_score_by_proficiency_level(score_of_doc)
+                if bds_threat_level is None:
+                    is_bds = False
+                field_to_insert = {"doc":{"is_bds":is_bds,"bds_threat_level":bds_threat_level,"bds_percent":bds_percent}}
+                status = self.elastic.update_document(doc_id,field_to_insert)
+                self.loger.info(f"the score and risk is updated :{status} ")
+        except Exception as e:
+            self.loger.error("the new field in elastic is not updated")
+
+if __name__ == "__main__":
+    search = Searching_in_elastic(elasticserch_url,indices_name)
+    search.insert_new_fields()
+

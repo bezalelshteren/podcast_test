@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 
 COPY loger/ ./loger
-COPY convert_Text_To_Speach/ .
+COPY procces_and_enrich/ .
 COPY utils/ ./utils
 
 CMD ["python", "manager.py"]

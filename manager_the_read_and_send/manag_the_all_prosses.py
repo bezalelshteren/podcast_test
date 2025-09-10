@@ -1,5 +1,5 @@
-from producer import Producer
-from read_local_files import Read_local_files
+from utils.producer import Producer
+from utils.read_local_files import Read_local_files
 from get_metadata import Get_metadata
 from pathlib import Path
 from dotenv import load_dotenv
